@@ -55,7 +55,7 @@ public class QRCodeShowServlet extends HttpServlet {
 
         OutputStream output = null;
         try {
-            final String filePath = new File(this.getClass().getResource("").getPath(),"qrcode.png").getAbsolutePath();
+            final String filePath = new File(this.getClass().getResource("/").getPath(),"qrcode.png").getAbsolutePath();
             final byte[] data = IOUtils.toByteArray(new FileInputStream(filePath));
 
             output = resp.getOutputStream();

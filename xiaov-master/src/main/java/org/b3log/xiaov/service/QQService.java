@@ -72,25 +72,11 @@ public class QQService {
     private final Map<Long, Group> QQ_GROUPS = new ConcurrentHashMap<>();
 
     /**
-     * The latest group ad time.
-     *
-     * &lt;groupId, time&gt;
-     */
-    private final Map<Long, Long> GROUP_AD_TIME = new ConcurrentHashMap<>();
-
-    /**
      * QQ discusses.
      *
      * &lt;discussId, discuss&gt;
      */
     private final Map<Long, Discuss> QQ_DISCUSSES = new ConcurrentHashMap<>();
-
-    /**
-     * The latest discuss ad time.
-     *
-     * &lt;discussId, time&gt;
-     */
-    private final Map<Long, Long> DISCUSS_AD_TIME = new ConcurrentHashMap<>();
 
     /**
      * 是否启用小薇的守护来进行消息送达确认.
@@ -186,10 +172,6 @@ public class QQService {
             final String[] ads = adConf.split("#");
             ADS.addAll(Arrays.asList(ads));
         }
-
-        ADS.add(XIAO_V_INTRO);
-        ADS.add(XIAO_V_INTRO);
-        ADS.add(XIAO_V_INTRO);
     }
 
     /**
@@ -576,21 +558,6 @@ public class QQService {
             return;
         }
 
-        if (RandomUtils.nextFloat() >= 0.9) {
-            Long latestAdTime = GROUP_AD_TIME.get(groupId);
-            if (null == latestAdTime) {
-                latestAdTime = 0L;
-            }
-
-            final long now = System.currentTimeMillis();
-
-            if (now - latestAdTime > 1000 * 60 * 30) {
-                msg = msg + "\n\n（" + ADS.get(RandomUtils.nextInt(ADS.size())) + "）";
-
-                GROUP_AD_TIME.put(groupId, now);
-            }
-        }
-
         sendMessageToGroup(groupId, msg);
     }
 
@@ -615,21 +582,6 @@ public class QQService {
 
         if (StringUtils.isBlank(msg)) {
             return;
-        }
-
-        if (RandomUtils.nextFloat() >= 0.9) {
-            Long latestAdTime = DISCUSS_AD_TIME.get(discussId);
-            if (null == latestAdTime) {
-                latestAdTime = 0L;
-            }
-
-            final long now = System.currentTimeMillis();
-
-            if (now - latestAdTime > 1000 * 60 * 30) {
-                msg = msg + "\n\n（" + ADS.get(RandomUtils.nextInt(ADS.size())) + "）";
-
-                DISCUSS_AD_TIME.put(discussId, now);
-            }
         }
 
         sendMessageToDiscuss(discussId, msg);
@@ -680,14 +632,12 @@ public class QQService {
     private void reloadGroups() {
         final List<Group> groups = xiaoV.getGroupList();
         QQ_GROUPS.clear();
-        GROUP_AD_TIME.clear();
         UNPUSH_GROUPS.clear();
 
         final StringBuilder msgBuilder = new StringBuilder();
         msgBuilder.append("Reloaded groups: \n");
         for (final Group g : groups) {
             QQ_GROUPS.put(g.getId(), g);
-            GROUP_AD_TIME.put(g.getId(), 0L);
             UNPUSH_GROUPS.add(g.getId());
 
             msgBuilder.append("    ").append(g.getName()).append(": ").append(g.getId()).append("\n");
@@ -699,14 +649,11 @@ public class QQService {
     private void reloadDiscusses() {
         final List<Discuss> discusses = xiaoV.getDiscussList();
         QQ_DISCUSSES.clear();
-        DISCUSS_AD_TIME.clear();
 
         final StringBuilder msgBuilder = new StringBuilder();
         msgBuilder.append("Reloaded discusses: \n");
         for (final Discuss d : discusses) {
             QQ_DISCUSSES.put(d.getId(), d);
-            DISCUSS_AD_TIME.put(d.getId(), 0L);
-
             msgBuilder.append("    ").append(d.getName()).append(": ").append(d.getId()).append("\n");
         }
 

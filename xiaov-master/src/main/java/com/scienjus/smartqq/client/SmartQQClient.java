@@ -276,49 +276,6 @@ public class SmartQQClient implements Closeable {
 	public void sendMessageToGroup(long groupId, String msg) {
 		LOGGER.debug("开始发送群消息");
 
-		if (3 == QQ_BOT_TYPE) {
-			// 如果是茉莉机器人，则将灵签结果格式化输出
-			JSONObject parseMsg;
-			if (msg.indexOf("\\u8d22\\u795e\\u7237\\u7075\\u7b7e") > 0) {
-				// 财神爷灵签
-				parseMsg = JSONObject.parseObject(msg);
-
-				msg = "";
-				msg += "第" + parseMsg.getString("number2") + "签\r\n\r\n";
-				msg += "签语: " + parseMsg.getString("qianyu") + "\r\n";
-				msg += "注释: " + parseMsg.getString("zhushi") + "\r\n";
-				msg += "解签: " + parseMsg.getString("jieqian") + "\r\n";
-				msg += "解说: " + parseMsg.getString("jieshuo") + "\r\n\r\n";
-				msg += "婚姻: " + parseMsg.getString("hunyin") + "\r\n";
-				msg += "事业: " + parseMsg.getString("shiye") + "\r\n";
-				msg += "运途: " + parseMsg.getString("yuntu");
-				msg = msg.replace("null", "无");
-			} else if (msg.indexOf("\\u6708\\u8001\\u7075\\u7b7e") > 0) {
-				// 观音灵签
-				parseMsg = JSONObject.parseObject(msg);
-
-				msg = "";
-				msg += "第" + parseMsg.getString("number2") + "签\r\n\r\n";
-				msg += "签位: " + parseMsg.getString("haohua") + "\r\n";
-				msg += "签语: " + parseMsg.getString("qianyu") + "\r\n";
-				msg += "诗意: " + parseMsg.getString("shiyi") + "\r\n";
-				msg += "解签: " + parseMsg.getString("jieqian");
-				msg = msg.replace("null", "无");
-			} else if (msg.indexOf("\\u89c2\\u97f3\\u7075\\u7b7e") > 0) {
-				// 月老灵签
-				parseMsg = JSONObject.parseObject(msg);
-
-				msg = "";
-				msg += "第" + parseMsg.getString("number2") + "签\r\n\r\n";
-				msg += "签位: " + parseMsg.getString("haohua") + "\r\n";
-				msg += "签语: " + parseMsg.getString("qianyu") + "\r\n";
-				msg += "注释: " + parseMsg.getString("zhushi") + "\r\n";
-				msg += "解签: " + parseMsg.getString("jieqian") + "\r\n";
-				msg += "白话释义: " + parseMsg.getString("baihua");
-				msg = msg.replace("null", "无");
-			}
-		}
-
 		JSONObject r = new JSONObject();
 		r.put("group_uin", groupId);
 		r.put("content", JSON.toJSONString(Arrays.asList(msg, Arrays.asList("font", Font.DEFAULT_FONT)))); // 注意这里虽然格式是Json，但是实际是String
@@ -715,7 +672,9 @@ public class SmartQQClient implements Closeable {
 		}
 		JSONObject json = JSON.parseObject(response.getBody());
 		Integer errCode = json.getInteger("errCode");
-		if (errCode != null && errCode == 0) {
+		//retcode为100100发送成功
+		Integer retCode = json.getInteger("retcode");
+		if (errCode != null && errCode == 0 || retCode == 100100) {
 			LOGGER.debug("发送成功!");
 		} else {
 			LOGGER.error(String.format("发送失败，Api返回码[%d]", json.getInteger("retcode")));

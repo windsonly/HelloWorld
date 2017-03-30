@@ -43,6 +43,7 @@ import org.b3log.latke.urlfetch.URLFetchServiceFactory;
 import org.b3log.latke.util.Strings;
 import org.b3log.xiaov.util.XiaoVs;
 
+import com.alibaba.fastjson.JSONObject;
 import com.scienjus.smartqq.callback.MessageCallback;
 import com.scienjus.smartqq.client.SmartQQClient;
 import com.scienjus.smartqq.model.Discuss;
@@ -142,17 +143,17 @@ public class QQService {
 	/**
 	 * XiaoV self intro. Built-in advertisement.
 	 */
-	private static final String XIAO_V_INTRO = "你好，我是小薇~ 关于我的更多资料请看帖 https://hacpai.com/article/1467011936362";
+	private static final String XIAO_V_INTRO = "你好，我是" + XiaoVs.getString("qq.bot.name");
 
 	/**
 	 * XiaoV listener self intro.
 	 */
-	private static final String XIAO_V_LISTENER_INTRO = "你好，我是小薇的守护，关于我的更多资料请看帖 https://hacpai.com/article/1467011936362";
+	private static final String XIAO_V_LISTENER_INTRO = "你好，我是" + XiaoVs.getString("qq.bot.name") + "的守护";
 
 	/**
 	 * No listener message.
 	 */
-	private static final String NO_LISTENER = "请把我的守护也拉进群，否则会造成大量消息重复（如果已经拉了，那就稍等 10 秒钟，我的守护可能在醒瞌睡 O(∩_∩)O哈哈~）\n\nPS：小薇机器人使用问题请看帖 https://hacpai.com/article/1467011936362";
+	private static final String NO_LISTENER = "请把我的守护也拉进群，否则会造成大量消息重复（如果已经拉了，那就稍等 10 秒钟，我的守护可能在醒瞌睡 O(∩_∩)O哈哈~）";
 
 	/**
 	 * 超过 {@value #PUSH_GROUP_USER_COUNT} 个成员的群才推送.
@@ -251,7 +252,7 @@ public class QQService {
 		LOGGER.info("小薇初始化完毕");
 
 		if (MSG_ACK_ENABLED) { // 如果启用了消息送达确认
-			LOGGER.info("开始初始化小薇的守护（细节请看：https://github.com/b3log/xiaov/issues/3）");
+			LOGGER.info("开始初始化小薇的守护...");
 
 			xiaoVListener = new SmartQQClient(new MessageCallback() {
 				@Override
@@ -628,7 +629,7 @@ public class QQService {
 		if (StringUtils.isBlank(userName) || StringUtils.isBlank(content)) {
 			return null;
 		}
-		
+
 		String search = skipBotName(content);
 		String keyword = "";
 		int keywordIndex = 0;
@@ -660,6 +661,46 @@ public class QQService {
 				ret = baiduQueryService.chat(content);
 			} else if (3 == QQ_BOT_TYPE) {
 				ret = itpkQueryService.chat(content);
+				// 如果是茉莉机器人，则将灵签结果格式化输出
+				JSONObject parseMsg;
+				if (ret.indexOf("\\u8d22\\u795e\\u7237\\u7075\\u7b7e") > 0) {
+					// 财神爷灵签
+					parseMsg = JSONObject.parseObject(ret);
+
+					ret = "";
+					ret += "第" + parseMsg.getString("number2") + "签\r\n\r\n";
+					ret += "签语: " + parseMsg.getString("qianyu") + "\r\n";
+					ret += "注释: " + parseMsg.getString("zhushi") + "\r\n";
+					ret += "解签: " + parseMsg.getString("jieqian") + "\r\n";
+					ret += "解说: " + parseMsg.getString("jieshuo") + "\r\n\r\n";
+					ret += "婚姻: " + parseMsg.getString("hunyin") + "\r\n";
+					ret += "事业: " + parseMsg.getString("shiye") + "\r\n";
+					ret += "运途: " + parseMsg.getString("yuntu");
+					ret = ret.replace("null", "无");
+				} else if (ret.indexOf("\\u6708\\u8001\\u7075\\u7b7e") > 0) {
+					// 观音灵签
+					parseMsg = JSONObject.parseObject(ret);
+
+					ret = "";
+					ret += "第" + parseMsg.getString("number2") + "签\r\n\r\n";
+					ret += "签位: " + parseMsg.getString("haohua") + "\r\n";
+					ret += "签语: " + parseMsg.getString("qianyu") + "\r\n";
+					ret += "诗意: " + parseMsg.getString("shiyi") + "\r\n";
+					ret += "解签: " + parseMsg.getString("jieqian");
+					ret = ret.replace("null", "无");
+				} else if (ret.indexOf("\\u89c2\\u97f3\\u7075\\u7b7e") > 0) {
+					// 月老灵签
+					parseMsg = JSONObject.parseObject(ret);
+
+					ret = "";
+					ret += "第" + parseMsg.getString("number2") + "签\r\n\r\n";
+					ret += "签位: " + parseMsg.getString("haohua") + "\r\n";
+					ret += "签语: " + parseMsg.getString("qianyu") + "\r\n";
+					ret += "注释: " + parseMsg.getString("zhushi") + "\r\n";
+					ret += "解签: " + parseMsg.getString("jieqian") + "\r\n";
+					ret += "白话释义: " + parseMsg.getString("baihua");
+					ret = ret.replace("null", "无");
+				}
 			}
 			if (StringUtils.isBlank(ret)) {
 				ret = "啊，你说什么？";

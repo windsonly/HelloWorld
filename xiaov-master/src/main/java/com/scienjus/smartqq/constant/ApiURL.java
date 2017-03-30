@@ -35,6 +35,10 @@ public enum ApiURL {
             "http://d1.web2.qq.com/channel/poll2",
             "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"
     ),
+//	POLL_MESSAGE(
+//	  "https://d1.web2.qq.com/channel/poll2",
+//	  "https://d1.web2.qq.com/cfproxy.html?v=20151105001&callback=1"
+//	),
     SEND_MESSAGE_TO_GROUP(
             "http://d1.web2.qq.com/channel/send_qun_msg2",
             "http://d1.web2.qq.com/proxy.html?v=20151105001&callback=1&id=2"

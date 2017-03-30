@@ -661,9 +661,9 @@ public class QQService {
 			} else if (3 == QQ_BOT_TYPE) {
 				ret = itpkQueryService.chat(content);
 			}
-		}
-		if (StringUtils.isBlank(ret)) {
-			ret = "啊，你说什么？";
+			if (StringUtils.isBlank(ret)) {
+				ret = "啊，你说什么？";
+			}
 		}
 		return ret;
 	}
